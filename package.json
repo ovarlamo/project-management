@@ -1,0 +1,17 @@
+{
+  "name": "project-management",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "dev": "concurrently \"npm:dev --workspace backend\" \"npm:dev --workspace frontend\"",
+    "build": "npm run build --workspace frontend",
+    "start": "npm run start --workspace backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
