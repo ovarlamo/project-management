@@ -83,3 +83,71 @@ npm run dev
 - `GET/POST/PUT/DELETE /api/users` (admin only)
 - `PATCH /api/users/:id/password` (admin only)
 - `GET /api/search?q=...`
+
+## Готовый чеклист кликов в интерфейсе Vercel
+
+Ниже сценарий «в лоб» без CLI, только через UI Vercel.
+
+### 1) Создать backend-проект
+1. Откройте `https://vercel.com/dashboard`.
+2. Нажмите **Add New...** → **Project**.
+3. В блоке **Import Git Repository** выберите ваш репозиторий и нажмите **Import**.
+4. На экране **Configure Project**:
+   - В поле **Project Name** задайте, например, `pms-backend`.
+   - В поле **Framework Preset** выберите **Other**.
+   - Раскройте **Root Directory** → укажите `backend`.
+5. Откройте секцию **Environment Variables** и добавьте по одному:
+   - `MONGO_URI` = `<ваш Mongo URI>`
+   - `JWT_SECRET` = `<длинный секрет>`
+   - `JWT_EXPIRES_IN` = `1d`
+   - `CLIENT_URL` = `https://<frontend-project>.vercel.app`
+   - `COOKIE_SECURE` = `true`
+   - `SEED_ADMIN_EMAIL` = `admin@pms.local` (или ваш)
+   - `SEED_ADMIN_PASSWORD` = `<ваш пароль>`
+6. Нажмите **Deploy**.
+7. После завершения нажмите **Visit** и скопируйте URL backend, например `https://pms-backend.vercel.app`.
+
+### 2) Создать frontend-проект
+1. Снова: **Add New...** → **Project**.
+2. Выберите тот же репозиторий → **Import**.
+3. На экране **Configure Project**:
+   - **Project Name**: например, `pms-frontend`.
+   - **Framework Preset**: **Vite**.
+   - **Root Directory**: `frontend`.
+4. В **Environment Variables** добавьте:
+   - `VITE_API_URL` = `https://pms-backend.vercel.app/api`
+5. Нажмите **Deploy**.
+6. Нажмите **Visit** и откройте frontend URL.
+
+### 3) Обновить backend CORS (если домен frontend изменился)
+1. Откройте проект `pms-backend` в Vercel.
+2. Вкладка **Settings** → **Environment Variables**.
+3. Найдите `CLIENT_URL` → **Edit**.
+4. Вставьте точный URL frontend (`https://...vercel.app`) → **Save**.
+5. Перейдите во вкладку **Deployments**.
+6. У последнего деплоя нажмите меню **⋯** → **Redeploy** → **Redeploy**.
+
+### 4) Проверка работы
+1. Откройте frontend URL.
+2. Войдите под админом (`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
+3. Откройте DevTools → **Application** → **Cookies** и убедитесь, что есть cookie `token`.
+4. Проверьте страницы:
+   - `/projects`
+   - `/tasks`
+   - `/users` (только для админа)
+   - `/search`
+
+### 5) Где смотреть ошибки
+- Backend: проект `pms-backend` → **Functions** → нужный вызов → **Logs**.
+- Frontend: проект `pms-frontend` → **Deployments** → последний деплой → **Runtime Logs** / **Build Logs**.
+
+## Troubleshooting Vercel: `Found invalid Node.js Version: "24.x"`
+Если в Vercel появляется ошибка про `24.x`, установите в проекте Vercel:
+
+1. **Settings** → **General**.
+2. Блок **Node.js Version**.
+3. Выберите **20.x**.
+4. Нажмите **Save**.
+5. Перейдите в **Deployments** → **Redeploy**.
+
+В репозитории версия также зафиксирована через `engines.node = "20.x"` и `.nvmrc`.
