@@ -1,179 +1,175 @@
-# Техническое задание 1.1
+# Project Management System (PMS)
 
-**Учебная веб-система управления проектами (PMS)**  
-**Версия документа:** 1.1  
-**Дата:** 09.04.2026  
-**Статус:** Утверждено
+Учебная веб-система управления проектами, реализованная по ТЗ 1.1 (React + Vite + Express + MongoDB + JWT cookie).
 
-## 1. Общие сведения
+## Что реализовано (MVP)
+- Авторизация по email/password, JWT в httpOnly cookie.
+- Защищённые роуты и проверка роли администратора.
+- CRUD проектов (soft-delete, фильтр по статусу, запрет удаления при активных задачах).
+- CRUD пользователей (только админ, soft-delete, отдельная смена пароля endpoint).
+- CRUD задач (soft-delete), подзадачи через `parentTaskId`, комментарии.
+- Глобальный поиск по проектам/задачам/пользователям (пользователи видны только админу).
+- Единый формат ошибок backend.
 
-### 1.1. Наименование системы
-Учебная веб-система управления проектами (Project Management System — PMS) с базовым функционалом, близким по логике к Redmine.
+## Структура
+- `backend/` — Express API + Mongoose.
+- `frontend/` — React SPA + Redux Toolkit + React Router.
 
-### 1.2. Основание для разработки
-Разработка ведётся в рамках дипломного проекта.
+## Запуск локально
+### 1) Установка
+```bash
+npm install
+```
 
-### 1.3. Цель разработки
-Создать минимально жизнеспособную (MVP), архитектурно расширяемую систему управления проектами с современным веб-интерфейсом, поддержкой авторизации, управлением проектами, пользователями и задачами.
+### 2) Конфигурация
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
 
-### 1.4. Ключевые принципы разработки
-- Минимально достаточный функционал для демонстрации и защиты диплома;
-- Современный, отзывчивый и единообразный интерфейс;
-- Чёткое разделение frontend и backend;
-- Модульная, масштабируемая и легко расширяемая архитектура;
-- Soft-delete (логическое удаление) для всех сущностей;
-- Не используем TypeScript.
+### 3) MongoDB
+Запустите локальный MongoDB (по умолчанию `mongodb://127.0.0.1:27017/pms`).
 
-**Технологический стек:**
-- **Frontend:** React 18+   + Vite + React Router 
-- **Backend:** Node.js + Express
-- **База данных:** MongoDB  
-- **Авторизация:** JWT + httpOnly cookie
+### 4) Development
+```bash
+npm run dev
+```
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`
 
-## 2. Назначение системы
-Система предназначена для ведения проектов, задач, пользователей и поиска в рамках учебного процесса.
+## Деплой на Vercel (frontend + backend)
+Рекомендуется создать **2 отдельных проекта в Vercel** из одного репозитория:
 
-## 3. Архитектура и общие требования
+### A. Backend проект (Root Directory = `backend`)
+1. Create Project → выбрать репозиторий → `Root Directory: backend`.
+2. Framework Preset: **Other**.
+3. Vercel использует `backend/vercel.json` и entrypoint `backend/api/index.js`.
+4. Добавить переменные окружения:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `JWT_EXPIRES_IN=1d`
+   - `CLIENT_URL=https://<frontend-domain>.vercel.app`
+   - `COOKIE_SECURE=true`
+   - `SEED_ADMIN_EMAIL` (опционально)
+   - `SEED_ADMIN_PASSWORD` (опционально)
+5. Задеплоить и сохранить URL backend, например: `https://pms-api.vercel.app`.
 
-Система реализуется по клиент-серверной архитектуре с чётким разделением слоёв.
+### B. Frontend проект (Root Directory = `frontend`)
+1. Create Project → тот же репозиторий → `Root Directory: frontend`.
+2. Framework Preset: **Vite**.
+3. Добавить переменную:
+   - `VITE_API_URL=https://pms-api.vercel.app/api`
+4. Задеплоить.
 
-**Backend слои:**
-- Controllers
-- Services
-- Middleware (auth, validation, soft-delete, error handling)
+### C. Проверка после деплоя
+- Открыть frontend URL.
+- Войти под seeded-админом (`admin@pms.local` / `admin123`, если не переопределяли).
+- Проверить, что cookie авторизации работает (вкладка Application → Cookies).
 
-**Frontend:**
-- Переиспользуемые UI-компоненты
-- Централизованный API client
-- Управление состоянием (Redux)
+## Тестовый администратор
+При первом запуске backend автоматически создаёт администратора:
+- Email: `admin@pms.local`
+- Password: `admin123`
 
-**Soft-delete:** Все сущности имеют поле `isDeleted: boolean`. Удалённые записи не отображаются в списках по умолчанию.
+Можно переопределить через `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`.
 
-## 4. Состав реализуемого функционала (MVP)
+## API endpoints (основные)
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `GET/POST/PUT/DELETE /api/projects`
+- `GET/POST/PUT/DELETE /api/tasks`
+- `POST /api/tasks/:id/comments`
+- `GET/POST/PUT/DELETE /api/users` (admin only)
+- `PATCH /api/users/:id/password` (admin only)
+- `GET /api/search?q=...`
 
-1. Авторизация пользователей
-2. Управление проектами
-3. Управление пользователями (только администратор)
-4. Управление задачами (с комментариями и подзадачами)
-5. Глобальный поиск
-6. Общая навигация
+## Готовый чеклист кликов в интерфейсе Vercel
 
-## 5. Пользователи и права доступа
+Ниже сценарий «в лоб» без CLI, только через UI Vercel.
 
-**Категории пользователей:**
-- **Administrator** — полный доступ
-- **User** — обычный пользователь
+### 1) Создать backend-проект
+1. Откройте `https://vercel.com/dashboard`.
+2. Нажмите **Add New...** → **Project**.
+3. В блоке **Import Git Repository** выберите ваш репозиторий и нажмите **Import**.
+4. На экране **Configure Project**:
+   - В поле **Project Name** задайте, например, `pms-backend`.
+   - В поле **Framework Preset** выберите **Other**.
+   - Раскройте **Root Directory** → укажите `backend`.
+5. Откройте секцию **Environment Variables** и добавьте по одному:
+   - `MONGO_URI` = `<ваш Mongo URI>`
+   - `JWT_SECRET` = `<длинный секрет>`
+   - `JWT_EXPIRES_IN` = `1d`
+   - `CLIENT_URL` = `https://<frontend-project>.vercel.app`
+   - `COOKIE_SECURE` = `true`
+   - `SEED_ADMIN_EMAIL` = `admin@pms.local` (или ваш)
+   - `SEED_ADMIN_PASSWORD` = `<ваш пароль>`
+6. Нажмите **Deploy**.
+7. После завершения нажмите **Visit** и скопируйте URL backend, например `https://pms-backend.vercel.app`.
 
-**Права (упрощённая модель 1.1):**
-- Все авторизованные пользователи имеют права на создание, редактирование и удаление проектов и задач.
-- Только пользователи с флагом `isAdmin = true` могут управлять пользователями (CRUD).
-- Флаг `isAdmin` сохранён как задел на будущее.
+### 2) Создать frontend-проект
+1. Снова: **Add New...** → **Project**.
+2. Выберите тот же репозиторий → **Import**.
+3. На экране **Configure Project**:
+   - **Project Name**: например, `pms-frontend`.
+   - **Framework Preset**: **Vite**.
+   - **Root Directory**: `frontend`.
+4. В **Environment Variables** добавьте:
+   - `VITE_API_URL` = `https://pms-backend.vercel.app/api`
+5. Нажмите **Deploy**.
+6. Нажмите **Visit** и откройте frontend URL.
 
-## 6. Функциональные требования
+### 3) Обновить backend CORS (если домен frontend изменился)
+1. Откройте проект `pms-backend` в Vercel.
+2. Вкладка **Settings** → **Environment Variables**.
+3. Найдите `CLIENT_URL` → **Edit**.
+4. Вставьте точный URL frontend (`https://...vercel.app`) → **Save**.
+5. Перейдите во вкладку **Deployments**.
+6. У последнего деплоя нажмите меню **⋯** → **Redeploy** → **Redeploy**.
 
-### 6.1. Модуль авторизации
-- Страница `/login`
-- Логин = email
-- JWT-токен в httpOnly cookie
-- После успешной авторизации — редирект на `/projects`
-- Функция Logout
+### 4) Проверка работы
+1. Откройте frontend URL.
+2. Войдите под админом (`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
+3. Откройте DevTools → **Application** → **Cookies** и убедитесь, что есть cookie `token`.
+4. Проверьте страницы:
+   - `/projects`
+   - `/tasks`
+   - `/users` (только для админа)
+   - `/search`
 
-### 6.2. Модуль управления проектами
+### 5) Где смотреть ошибки
+- Backend: проект `pms-backend` → **Functions** → нужный вызов → **Logs**.
+- Frontend: проект `pms-frontend` → **Deployments** → последний деплой → **Runtime Logs** / **Build Logs**.
 
-**Поля проекта:**
-- `id` — строковый уникальный
-- `name` — обязательное
-- `description`
-- `status` — `ACTIVE` / `ARCHIVED`
-- `createdAt`, `updatedAt`
-- `isDeleted`
+## Troubleshooting Vercel: `Found invalid Node.js Version: "24.x"`
+Если в Vercel появляется ошибка про `24.x`, установите в проекте Vercel:
 
-**Операции:** полный CRUD  
-**Фильтрация:** по статусу (по умолчанию — только `ACTIVE`)  
-**Удаление:** запрещено, если есть активные задачи.
+1. **Settings** → **General**.
+2. Блок **Node.js Version**.
+3. Выберите **20.x**.
+4. Нажмите **Save**.
+5. Перейдите в **Deployments** → **Redeploy**.
 
-### 6.3. Модуль управления пользователями (только для администратора)
+В репозитории версия также зафиксирована через `engines.node = "20.x"` и `.nvmrc`.
 
-**Поля пользователя:**
-- `id`
-- `email` (уникальный, используется как логин)
-- `fullName`
-- `passwordHash`
-- `isAdmin` (boolean)
-- `createdAt`, `updatedAt`
-- `isDeleted`
+## Проверка backend после деплоя
+1. Откройте `https://<backend-domain>/api/health` — должен вернуться JSON `{ "success": true, "data": "ok" }`.
+2. Проверьте логин запросом:
+   - `POST https://<backend-domain>/api/auth/login`
+   - body: `{ "email": "admin@pms.local", "password": "admin123" }`
+3. Если ответ `Invalid email or password`, откройте Vercel **Functions → Logs** и проверьте, есть ли строка `Seeded admin user:`.
 
-**Особенности формы:**
-- При создании — обязательное поле «Пароль»
-- При редактировании — поле пароля скрыто. Смена пароля — отдельная функция.
+> Важно: и для локального запуска, и для Vercel теперь используется единая инициализация (`initApp`), которая выполняет подключение к БД и сидинг администратора.
 
-### 6.4. Модуль управления задачами
+## Troubleshooting: `401 Unauthorized` на `/api/projects` после успешного логина
+Причина может быть в cookie `token`: если у cookie неверный `Path`, браузер отправляет её только на часть роутов.
 
-**Поля задачи:**
-- `id` (строковый)
-- `title` (обязательно)
-- `projectId` (обязательно)
-- `type` — `FEATURE` / `TASK`
-- `status` — `NEW` / `IN_PROGRESS` / `RESOLVED` / `CLOSED`
-- `startDate`
-- `dueDate`
-- `estimatedHours`
-- `actualHours`
-- `assigneeId`
-- `authorId` (обязательно, текущий пользователь)
-- `parentTaskId` (null или ссылка)
-- `description` (обязательно)
-- `comments` (массив объектов)
-- `createdAt`, `updatedAt`
-- `isDeleted`
+Что исправлено в проекте:
+- cookie авторизации теперь выставляется с `path: '/'`;
+- logout очищает cookie с тем же `path: '/'`.
 
- 
-
-**Комментарии:**
-- `authorId`, `text`, `createdAt`
-
-**Фильтры (обязательные):**
-- По проекту
-- По статусу
-
-### 6.5. Модуль поиска
-- Быстрый поиск в верхней панели (глобальный)
-- Отдельная страница `/search` с расширенными результатами
-
-### 6.6. Навигация
-Постоянная верхняя панель:
-- Проекты
-- Задачи
-- Пользователи (только админу)
-- Поиск
-- Профиль + Выход
-
-## 7. Нефункциональные требования
- 
-- Единый формат ответов об ошибках
- 
-
-## 8. Ограничения проекта
-
-Не реализуется в рамках дипломной работы:
-- Регистрация пользователей
-- Прикрепление файлов
-- История изменений
-- Уведомления
-- Kanban, Гантт, приоритеты, теги и т.д.
-
-## 9. Критерии приемки
-
-Система считается завершённой, если работают:
-1. Авторизация и защита маршрутов
-2. Полный CRUD проектов, задач и пользователей
-3. Soft-delete + корректные проверки при удалении
-4. Связь задач с проектами и иерархия подзадач
-5. Добавление и отображение комментариев
-6. Фильтры и глобальный поиск
-7. Современный адаптивный интерфейс
-8. Чистый, модульный, документированный код
-
----
-
-**Конец документа**
+После деплоя backend:
+1. Выйдите из аккаунта.
+2. Очистите cookies для frontend/backend домена.
+3. Войдите снова.
+4. Проверьте в DevTools → Application → Cookies, что у `token` стоит `Path=/`.
