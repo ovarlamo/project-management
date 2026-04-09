@@ -151,3 +151,12 @@ npm run dev
 5. Перейдите в **Deployments** → **Redeploy**.
 
 В репозитории версия также зафиксирована через `engines.node = "20.x"` и `.nvmrc`.
+
+## Проверка backend после деплоя
+1. Откройте `https://<backend-domain>/api/health` — должен вернуться JSON `{ "success": true, "data": "ok" }`.
+2. Проверьте логин запросом:
+   - `POST https://<backend-domain>/api/auth/login`
+   - body: `{ "email": "admin@pms.local", "password": "admin123" }`
+3. Если ответ `Invalid email or password`, откройте Vercel **Functions → Logs** и проверьте, есть ли строка `Seeded admin user:`.
+
+> Важно: и для локального запуска, и для Vercel теперь используется единая инициализация (`initApp`), которая выполняет подключение к БД и сидинг администратора.

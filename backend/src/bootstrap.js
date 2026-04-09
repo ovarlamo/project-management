@@ -1,14 +1,8 @@
-import { app } from './app.js';
-import { env } from './config/env.js';
-import { initApp } from './bootstrap.js';
-
-async function bootstrap() {
-  await initApp();
 import bcrypt from 'bcryptjs';
-import { app } from './app.js';
-import { env } from './config/env.js';
 import { connectDb } from './config/db.js';
 import { User } from './models/User.js';
+
+let initialized = false;
 
 async function ensureAdmin() {
   const email = process.env.SEED_ADMIN_EMAIL || 'admin@pms.local';
@@ -18,20 +12,14 @@ async function ensureAdmin() {
   if (!existing) {
     const passwordHash = await bcrypt.hash(password, 10);
     await User.create({ email, fullName: 'System Administrator', passwordHash, isAdmin: true });
-    console.log(`Seeded admin user: ${email} / ${password}`);
+    console.log(`Seeded admin user: ${email}`);
   }
 }
 
-async function bootstrap() {
+export async function initApp() {
+  if (initialized) return;
+
   await connectDb();
   await ensureAdmin();
-
-  app.listen(env.port, () => {
-    console.log(`Backend is running at http://localhost:${env.port}`);
-  });
+  initialized = true;
 }
-
-bootstrap().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
