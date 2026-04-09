@@ -160,3 +160,16 @@ npm run dev
 3. Если ответ `Invalid email or password`, откройте Vercel **Functions → Logs** и проверьте, есть ли строка `Seeded admin user:`.
 
 > Важно: и для локального запуска, и для Vercel теперь используется единая инициализация (`initApp`), которая выполняет подключение к БД и сидинг администратора.
+
+## Troubleshooting: `401 Unauthorized` на `/api/projects` после успешного логина
+Причина может быть в cookie `token`: если у cookie неверный `Path`, браузер отправляет её только на часть роутов.
+
+Что исправлено в проекте:
+- cookie авторизации теперь выставляется с `path: '/'`;
+- logout очищает cookie с тем же `path: '/'`.
+
+После деплоя backend:
+1. Выйдите из аккаунта.
+2. Очистите cookies для frontend/backend домена.
+3. Войдите снова.
+4. Проверьте в DevTools → Application → Cookies, что у `token` стоит `Path=/`.
