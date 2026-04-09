@@ -1,9 +1,10 @@
 import { app } from '../src/app.js';
 import { initApp } from '../src/bootstrap.js';
+import { connectDb } from '../src/config/db.js';
 
 export default async function handler(req, res) {
   await initApp();
-import { connectDb } from '../src/config/db.js';
+
 
 let initialized = false;
 
