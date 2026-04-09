@@ -1,12 +1,12 @@
-import { env } from '../config/env.js';
-import * as authService from '../services/authService.js';
+import { env } from "../config/env.js";
+import * as authService from "../services/authService.js";
 
 const cookieOptions = {
   httpOnly: true,
   secure: env.cookieSecure,
-  sameSite: 'lax',
-  path: '/',
-  maxAge: 24 * 60 * 60 * 1000
+  sameSite: "none",
+  path: "/",
+  maxAge: 24 * 60 * 60 * 1000,
 };
 
 export async function login(req, res, next) {
@@ -14,7 +14,7 @@ export async function login(req, res, next) {
     const { email, password } = req.body;
     const result = await authService.login(email, password);
 
-    res.cookie('token', result.token, cookieOptions);
+    res.cookie("token", result.token, cookieOptions);
     res.json({ success: true, data: result.user });
   } catch (err) {
     next(err);
@@ -31,7 +31,7 @@ export async function me(req, res, next) {
 }
 
 export function logout(req, res) {
-  res.clearCookie('token', { path: '/' });
-  res.clearCookie('token');
+  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token");
   res.json({ success: true, data: true });
 }
