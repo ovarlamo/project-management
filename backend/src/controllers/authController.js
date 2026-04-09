@@ -32,5 +32,6 @@ export async function me(req, res, next) {
 
 export function logout(req, res) {
   res.clearCookie('token', { path: '/' });
+  res.clearCookie('token');
   res.json({ success: true, data: true });
 }
