@@ -1,0 +1,18 @@
+:root { font-family: Inter, system-ui, sans-serif; color-scheme: light; }
+body { margin: 0; background: #f4f6f8; color: #102027; }
+a { text-decoration: none; color: inherit; }
+.topbar { position: sticky; top: 0; background: #0d47a1; color: white; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; gap: 20px; }
+.topbar nav { display: flex; gap: 12px; }
+.topbar nav a { opacity: 0.9; }
+.topbar nav a.active { font-weight: 700; opacity: 1; }
+.logo { font-weight: 700; }
+.profile { display: flex; align-items: center; gap: 10px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+.card { background: white; border-radius: 10px; padding: 14px; box-shadow: 0 1px 6px rgba(0,0,0,.08); }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-top: 14px; }
+.form-grid, .toolbar { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: center; }
+.auth-card { max-width: 420px; margin: 15vh auto; background: white; border-radius: 12px; padding: 22px; box-shadow: 0 1px 6px rgba(0,0,0,.12); }
+input, textarea, select, button { padding: 10px; border: 1px solid #cfd8dc; border-radius: 8px; font: inherit; }
+button { background: #1565c0; color: white; border: none; cursor: pointer; }
+.error { color: #c62828; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; }
