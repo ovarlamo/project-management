@@ -15,7 +15,7 @@
 - `backend/` — Express API + Mongoose.
 - `frontend/` — React SPA + Redux Toolkit + React Router.
 
-## Запуск
+## Запуск локально
 ### 1) Установка
 ```bash
 npm install
@@ -36,6 +36,35 @@ npm run dev
 ```
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:5000`
+
+## Деплой на Vercel (frontend + backend)
+Рекомендуется создать **2 отдельных проекта в Vercel** из одного репозитория:
+
+### A. Backend проект (Root Directory = `backend`)
+1. Create Project → выбрать репозиторий → `Root Directory: backend`.
+2. Framework Preset: **Other**.
+3. Vercel использует `backend/vercel.json` и entrypoint `backend/api/index.js`.
+4. Добавить переменные окружения:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `JWT_EXPIRES_IN=1d`
+   - `CLIENT_URL=https://<frontend-domain>.vercel.app`
+   - `COOKIE_SECURE=true`
+   - `SEED_ADMIN_EMAIL` (опционально)
+   - `SEED_ADMIN_PASSWORD` (опционально)
+5. Задеплоить и сохранить URL backend, например: `https://pms-api.vercel.app`.
+
+### B. Frontend проект (Root Directory = `frontend`)
+1. Create Project → тот же репозиторий → `Root Directory: frontend`.
+2. Framework Preset: **Vite**.
+3. Добавить переменную:
+   - `VITE_API_URL=https://pms-api.vercel.app/api`
+4. Задеплоить.
+
+### C. Проверка после деплоя
+- Открыть frontend URL.
+- Войти под seeded-админом (`admin@pms.local` / `admin123`, если не переопределяли).
+- Проверить, что cookie авторизации работает (вкладка Application → Cookies).
 
 ## Тестовый администратор
 При первом запуске backend автоматически создаёт администратора:
