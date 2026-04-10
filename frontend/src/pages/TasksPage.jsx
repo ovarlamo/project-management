@@ -93,6 +93,15 @@ export function TasksPage() {
             <p>{task.status} · {task.type}</p>
             <p>Проект: {task.projectId?.name || '-'}</p>
             <p>Комментарии: {task.comments?.length || 0}</p>
+            {task.comments?.length > 0 && (
+              <div>
+                {task.comments.map((item, index) => (
+                  <p key={`${task._id}-comment-${index}`}>
+                    • {item.text} ({new Date(item.createdAt).toLocaleString('ru-RU')})
+                  </p>
+                ))}
+              </div>
+            )}
             <button type="button" onClick={() => startEdit(task)}>Редактировать</button>
             <button type="button" onClick={() => comment(task._id)}>Добавить комментарий</button>
           </article>
