@@ -4,7 +4,7 @@ import * as authService from "../services/authService.js";
 const cookieOptions = {
   httpOnly: true,
   secure: env.cookieSecure,
-  sameSite: "none",
+  sameSite: env.cookieSecure ? "none" : "lax",
   path: "/",
   maxAge: 24 * 60 * 60 * 1000,
 };
