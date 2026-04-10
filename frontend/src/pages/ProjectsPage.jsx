@@ -62,8 +62,17 @@ export function ProjectsPage() {
         </select>
       </div>
       <form onSubmit={create} className="card form-grid">
-        <input required placeholder="Название" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <input placeholder="Описание" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        <input
+          required
+          placeholder="Название"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          placeholder="Описание"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
         <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
           <option value="ACTIVE">ACTIVE</option>
           <option value="ARCHIVED">ARCHIVED</option>
