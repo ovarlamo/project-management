@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { EditDialog } from '../components/EditDialog';
 import { api } from '../services/api';
 
 export function TasksPage() {
@@ -6,6 +7,8 @@ export function TasksPage() {
   const [projects, setProjects] = useState([]);
   const [filters, setFilters] = useState({ projectId: '', status: '' });
   const [form, setForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+  const [editingTask, setEditingTask] = useState(null);
+  const [editForm, setEditForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
 
   const loadProjects = async () => setProjects(await api.get('/projects?status='));
   const loadTasks = async () => {
@@ -13,13 +16,39 @@ export function TasksPage() {
     setTasks(await api.get(`/tasks?${params.toString()}`));
   };
 
-  useEffect(() => { loadProjects(); }, []);
-  useEffect(() => { loadTasks(); }, [filters]);
+  useEffect(() => {
+    loadProjects();
+  }, []);
+  useEffect(() => {
+    loadTasks();
+  }, [filters]);
 
   const create = async (e) => {
     e.preventDefault();
     await api.post('/tasks', form);
     setForm({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+    loadTasks();
+  };
+
+  const startEdit = (task) => {
+    setEditingTask(task);
+    setEditForm({
+      title: task.title,
+      description: task.description || '',
+      projectId: task.projectId?._id || task.projectId,
+      type: task.type,
+      status: task.status
+    });
+  };
+
+  const closeEdit = () => {
+    setEditingTask(null);
+    setEditForm({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+  };
+
+  const saveEdit = async () => {
+    await api.put(`/tasks/${editingTask._id}`, editForm);
+    closeEdit();
     loadTasks();
   };
 
@@ -64,10 +93,54 @@ export function TasksPage() {
             <p>{task.status} · {task.type}</p>
             <p>Проект: {task.projectId?.name || '-'}</p>
             <p>Комментарии: {task.comments?.length || 0}</p>
-            <button onClick={() => comment(task._id)}>Добавить комментарий</button>
+            {task.comments?.length > 0 && (
+              <div>
+                {task.comments.map((item, index) => (
+                  <p key={`${task._id}-comment-${index}`}>
+                    • {item.text} ({new Date(item.createdAt).toLocaleString('ru-RU')})
+                  </p>
+                ))}
+              </div>
+            )}
+            <button type="button" onClick={() => startEdit(task)}>Редактировать</button>
+            <button type="button" onClick={() => comment(task._id)}>Добавить комментарий</button>
           </article>
         ))}
       </div>
+      <EditDialog
+        title="Редактирование задачи"
+        open={Boolean(editingTask)}
+        onClose={closeEdit}
+        onSave={saveEdit}
+      >
+        <input
+          required
+          placeholder="Заголовок"
+          value={editForm.title}
+          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+        />
+        <textarea
+          required
+          placeholder="Описание"
+          value={editForm.description}
+          onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+        />
+        <select
+          required
+          value={editForm.projectId}
+          onChange={(e) => setEditForm({ ...editForm, projectId: e.target.value })}
+        >
+          <option value="">Проект</option>
+          {projects.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
+        </select>
+        <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
+          <option value="TASK">TASK</option>
+          <option value="FEATURE">FEATURE</option>
+        </select>
+        <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
+          {['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </EditDialog>
     </section>
   );
 }
