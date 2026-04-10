@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { EditDialog } from '../components/EditDialog';
 import { api } from '../services/api';
 
 export function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [status, setStatus] = useState('ACTIVE');
   const [form, setForm] = useState({ name: '', description: '', status: 'ACTIVE' });
-  const [editingId, setEditingId] = useState(null);
+  const [editingProject, setEditingProject] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', description: '', status: 'ACTIVE' });
 
   const load = async () => {
@@ -25,7 +26,7 @@ export function ProjectsPage() {
   };
 
   const startEdit = (project) => {
-    setEditingId(project._id);
+    setEditingProject(project);
     setEditForm({
       name: project.name,
       description: project.description || '',
@@ -33,14 +34,14 @@ export function ProjectsPage() {
     });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
+  const closeEdit = () => {
+    setEditingProject(null);
     setEditForm({ name: '', description: '', status: 'ACTIVE' });
   };
 
-  const saveEdit = async (id) => {
-    await api.put(`/projects/${id}`, editForm);
-    cancelEdit();
+  const saveEdit = async () => {
+    await api.put(`/projects/${editingProject._id}`, editForm);
+    closeEdit();
     load();
   };
 
@@ -81,41 +82,39 @@ export function ProjectsPage() {
       <div className="list">
         {projects.map((project) => (
           <article key={project._id} className="card">
-            {editingId === project._id ? (
-              <>
-                <input
-                  required
-                  placeholder="Название"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                />
-                <input
-                  placeholder="Описание"
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                />
-                <select
-                  value={editForm.status}
-                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="ARCHIVED">ARCHIVED</option>
-                </select>
-                <button onClick={() => saveEdit(project._id)}>Сохранить</button>
-                <button onClick={cancelEdit}>Отмена</button>
-              </>
-            ) : (
-              <>
-                <h3>{project.name}</h3>
-                <p>{project.description}</p>
-                <p>{project.status}</p>
-                <button onClick={() => startEdit(project)}>Редактировать</button>
-                <button onClick={() => remove(project._id)}>Удалить</button>
-              </>
-            )}
+            <h3>{project.name}</h3>
+            <p>{project.description}</p>
+            <p>{project.status}</p>
+            <button type="button" onClick={() => startEdit(project)}>Редактировать</button>
+            <button type="button" onClick={() => remove(project._id)}>Удалить</button>
           </article>
         ))}
       </div>
+      <EditDialog
+        title="Редактирование проекта"
+        open={Boolean(editingProject)}
+        onClose={closeEdit}
+        onSave={saveEdit}
+      >
+        <input
+          required
+          placeholder="Название"
+          value={editForm.name}
+          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+        />
+        <input
+          placeholder="Описание"
+          value={editForm.description}
+          onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+        />
+        <select
+          value={editForm.status}
+          onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+        >
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="ARCHIVED">ARCHIVED</option>
+        </select>
+      </EditDialog>
     </section>
   );
 }
