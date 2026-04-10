@@ -5,18 +5,42 @@ export function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [status, setStatus] = useState('ACTIVE');
   const [form, setForm] = useState({ name: '', description: '', status: 'ACTIVE' });
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', description: '', status: 'ACTIVE' });
 
   const load = async () => {
     const data = await api.get(`/projects?status=${status}`);
     setProjects(data);
   };
 
-  useEffect(() => { load(); }, [status]);
+  useEffect(() => {
+    load();
+  }, [status]);
 
   const create = async (e) => {
     e.preventDefault();
     await api.post('/projects', form);
     setForm({ name: '', description: '', status: 'ACTIVE' });
+    load();
+  };
+
+  const startEdit = (project) => {
+    setEditingId(project._id);
+    setEditForm({
+      name: project.name,
+      description: project.description || '',
+      status: project.status
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ name: '', description: '', status: 'ACTIVE' });
+  };
+
+  const saveEdit = async (id) => {
+    await api.put(`/projects/${id}`, editForm);
+    cancelEdit();
     load();
   };
 
@@ -37,8 +61,17 @@ export function ProjectsPage() {
         </select>
       </div>
       <form onSubmit={create} className="card form-grid">
-        <input required placeholder="Название" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <input placeholder="Описание" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        <input
+          required
+          placeholder="Название"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          placeholder="Описание"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
         <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
           <option value="ACTIVE">ACTIVE</option>
           <option value="ARCHIVED">ARCHIVED</option>
@@ -48,10 +81,38 @@ export function ProjectsPage() {
       <div className="list">
         {projects.map((project) => (
           <article key={project._id} className="card">
-            <h3>{project.name}</h3>
-            <p>{project.description}</p>
-            <p>{project.status}</p>
-            <button onClick={() => remove(project._id)}>Удалить</button>
+            {editingId === project._id ? (
+              <>
+                <input
+                  required
+                  placeholder="Название"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                />
+                <input
+                  placeholder="Описание"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                />
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="ARCHIVED">ARCHIVED</option>
+                </select>
+                <button onClick={() => saveEdit(project._id)}>Сохранить</button>
+                <button onClick={cancelEdit}>Отмена</button>
+              </>
+            ) : (
+              <>
+                <h3>{project.name}</h3>
+                <p>{project.description}</p>
+                <p>{project.status}</p>
+                <button onClick={() => startEdit(project)}>Редактировать</button>
+                <button onClick={() => remove(project._id)}>Удалить</button>
+              </>
+            )}
           </article>
         ))}
       </div>
