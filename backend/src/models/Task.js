@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { DEFAULT_TASK_STATUS, TASK_STATUSES } from '../constants/taskStatus.js';
 
 const commentSchema = new mongoose.Schema(
   {
@@ -16,8 +17,8 @@ const taskSchema = new mongoose.Schema(
     type: { type: String, enum: ['FEATURE', 'TASK'], default: 'TASK' },
     status: {
       type: String,
-      enum: ['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'],
-      default: 'NEW'
+      enum: Object.values(TASK_STATUSES),
+      default: DEFAULT_TASK_STATUS
     },
     startDate: Date,
     dueDate: Date,
