@@ -103,8 +103,10 @@ export function ProjectsPage() {
               <h3>{project.name}</h3>
               <p>{project.description}</p>
               <p>{PROJECT_STATUS_LABELS[project.status] ?? project.status}</p>
-              <button type="button" onClick={() => startEdit(project)}>Редактировать</button>
-              <button type="button" onClick={() => remove(project._id)}>Удалить</button>
+              <div className="icon-actions">
+                <button type="button" className="icon-button" aria-label="Редактировать проект" title="Редактировать проект" onClick={() => startEdit(project)}>✏️</button>
+                <button type="button" className="icon-button" aria-label="Удалить проект" title="Удалить проект" onClick={() => remove(project._id)}>🗑️</button>
+              </div>
             </article>
           ))}
         </div>
