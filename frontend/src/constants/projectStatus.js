@@ -1,0 +1,21 @@
+export const PROJECT_STATUSES = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED'
+});
+
+export const PROJECT_STATUS_LABELS = Object.freeze({
+  [PROJECT_STATUSES.ACTIVE]: 'Активный',
+  [PROJECT_STATUSES.ARCHIVED]: 'Архивный'
+});
+
+export const PROJECT_STATUS_OPTIONS = Object.freeze([
+  { value: PROJECT_STATUSES.ACTIVE, label: PROJECT_STATUS_LABELS[PROJECT_STATUSES.ACTIVE] },
+  { value: PROJECT_STATUSES.ARCHIVED, label: PROJECT_STATUS_LABELS[PROJECT_STATUSES.ARCHIVED] }
+]);
+
+export const ALL_PROJECTS_STATUS_OPTION = Object.freeze({
+  value: '',
+  label: 'Все'
+});
+
+export const DEFAULT_PROJECT_STATUS = PROJECT_STATUSES.ACTIVE;
