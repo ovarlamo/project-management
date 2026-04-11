@@ -67,6 +67,13 @@ export function TasksPage() {
     loadTasks();
   };
 
+  const removeTask = async (id) => {
+    const confirmed = window.confirm('Удалить задачу? Это действие нельзя отменить.');
+    if (!confirmed) return;
+    await api.del(`/tasks/${id}`);
+    loadTasks();
+  };
+
   return (
     <section>
       <h2>Задачи</h2>
@@ -113,6 +120,7 @@ export function TasksPage() {
               )}
               <button type="button" onClick={() => startEdit(task)}>Редактировать</button>
               <button type="button" onClick={() => comment(task._id)}>Добавить комментарий</button>
+              <button type="button" onClick={() => removeTask(task._id)}>Удалить</button>
             </article>
           ))}
         </div>
