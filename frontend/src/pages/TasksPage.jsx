@@ -118,9 +118,11 @@ export function TasksPage() {
                   ))}
                 </div>
               )}
-              <button type="button" onClick={() => startEdit(task)}>Редактировать</button>
-              <button type="button" onClick={() => comment(task._id)}>Добавить комментарий</button>
-              <button type="button" onClick={() => removeTask(task._id)}>Удалить</button>
+              <div className="icon-actions">
+                <button type="button" className="icon-button" aria-label="Редактировать задачу" title="Редактировать задачу" onClick={() => startEdit(task)}>✏️</button>
+                <button type="button" className="icon-button" aria-label="Добавить комментарий" title="Добавить комментарий" onClick={() => comment(task._id)}>💬</button>
+                <button type="button" className="icon-button" aria-label="Удалить задачу" title="Удалить задачу" onClick={() => removeTask(task._id)}>🗑️</button>
+              </div>
             </article>
           ))}
         </div>
