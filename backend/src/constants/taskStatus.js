@@ -1,0 +1,8 @@
+export const TASK_STATUSES = Object.freeze({
+  NEW: 'NEW',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+});
+
+export const DEFAULT_TASK_STATUS = TASK_STATUSES.NEW;

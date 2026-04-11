@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react';
 import { EditDialog } from '../components/EditDialog';
 import { Loader } from '../components/Loader';
 import { api } from '../services/api';
+import { ALL_TASKS_STATUS_OPTION, DEFAULT_TASK_STATUS, TASK_STATUS_LABELS, TASK_STATUS_OPTIONS } from '../constants/taskStatus';
 
 export function TasksPage() {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({ projectId: '', status: '' });
-  const [form, setForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+  const [form, setForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: DEFAULT_TASK_STATUS });
   const [editingTask, setEditingTask] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+  const [editForm, setEditForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: DEFAULT_TASK_STATUS });
 
   const loadProjects = async () => setProjects(await api.get('/projects?status='));
   const loadTasks = async () => {
@@ -33,7 +34,7 @@ export function TasksPage() {
   const create = async (e) => {
     e.preventDefault();
     await api.post('/tasks', form);
-    setForm({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+    setForm({ title: '', description: '', projectId: '', type: 'TASK', status: DEFAULT_TASK_STATUS });
     loadTasks();
   };
 
@@ -50,7 +51,7 @@ export function TasksPage() {
 
   const closeEdit = () => {
     setEditingTask(null);
-    setEditForm({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
+    setEditForm({ title: '', description: '', projectId: '', type: 'TASK', status: DEFAULT_TASK_STATUS });
   };
 
   const saveEdit = async () => {
@@ -75,8 +76,10 @@ export function TasksPage() {
           {projects.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
         </select>
         <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
-          <option value="">Все статусы</option>
-          {['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => <option key={s} value={s}>{s}</option>)}
+          <option value={ALL_TASKS_STATUS_OPTION.value}>{ALL_TASKS_STATUS_OPTION.label}</option>
+          {TASK_STATUS_OPTIONS.map((statusOption) => (
+            <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>
+          ))}
         </select>
       </div>
       <form onSubmit={create} className="card form-grid">
@@ -100,7 +103,8 @@ export function TasksPage() {
             <article key={task._id} className="card">
               <h3>{task.title}</h3>
               <p>{task.description}</p>
-              <p>{task.status} · {task.type}</p>
+              <p>Статус: {TASK_STATUS_LABELS[task.status] ?? task.status}</p>
+              <p>Тип: {task.type}</p>
               <p>Проект: {task.projectId?.name || '-'}</p>
               <p>Комментарии: {task.comments?.length || 0}</p>
               {task.comments?.length > 0 && (
@@ -149,7 +153,9 @@ export function TasksPage() {
           <option value="FEATURE">FEATURE</option>
         </select>
         <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
-          {['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => <option key={s} value={s}>{s}</option>)}
+          {TASK_STATUS_OPTIONS.map((statusOption) => (
+            <option key={statusOption.value} value={statusOption.value}>{statusOption.label}</option>
+          ))}
         </select>
       </EditDialog>
     </section>
