@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { EditDialog } from '../components/EditDialog';
 import { Loader } from '../components/Loader';
 import { api } from '../services/api';
 
@@ -6,6 +7,8 @@ export function UsersPage() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({ email: '', fullName: '', password: '', isAdmin: false });
+  const [editingUser, setEditingUser] = useState(null);
+  const [editForm, setEditForm] = useState({ fullName: '', isAdmin: false, password: '' });
 
   const load = async () => {
     setIsLoading(true);
@@ -30,6 +33,27 @@ export function UsersPage() {
     load();
   };
 
+  const startEdit = (user) => {
+    setEditingUser(user);
+    setEditForm({ fullName: user.fullName, isAdmin: user.isAdmin, password: '' });
+  };
+
+  const saveEdit = async () => {
+    if (!editingUser) return;
+    await api.put(`/users/${editingUser._id}`, {
+      fullName: editForm.fullName,
+      isAdmin: editForm.isAdmin
+    });
+
+    if (editForm.password.trim()) {
+      await api.patch(`/users/${editingUser._id}/password`, { password: editForm.password });
+    }
+
+    setEditingUser(null);
+    setEditForm({ fullName: '', isAdmin: false, password: '' });
+    load();
+  };
+
   return (
     <section>
       <h2>Пользователи</h2>
@@ -49,11 +73,39 @@ export function UsersPage() {
               <h3>{user.fullName}</h3>
               <p>{user.email}</p>
               <p>{user.isAdmin ? 'Administrator' : 'User'}</p>
+              <button onClick={() => startEdit(user)}>Редактировать</button>
               <button onClick={() => remove(user._id)}>Удалить</button>
             </article>
           ))}
         </div>
       )}
+      <EditDialog
+        title="Редактирование пользователя"
+        open={Boolean(editingUser)}
+        onClose={() => setEditingUser(null)}
+        onSave={saveEdit}
+      >
+        <input
+          required
+          placeholder="ФИО"
+          value={editForm.fullName}
+          onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+        />
+        <input
+          type="password"
+          placeholder="Новый пароль (необязательно)"
+          value={editForm.password}
+          onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+        />
+        <label>
+          <input
+            type="checkbox"
+            checked={editForm.isAdmin}
+            onChange={(e) => setEditForm({ ...editForm, isAdmin: e.target.checked })}
+          />{' '}
+          Админ
+        </label>
+      </EditDialog>
     </section>
   );
 }
