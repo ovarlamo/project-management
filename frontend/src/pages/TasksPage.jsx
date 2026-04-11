@@ -89,10 +89,6 @@ export function TasksPage() {
           <option value="">Проект</option>
           {projects.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
         </select>
-        <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-          <option value="TASK">TASK</option>
-          <option value="FEATURE">FEATURE</option>
-        </select>
         <button type="submit">Создать</button>
       </form>
       {isLoading ? (
@@ -104,7 +100,6 @@ export function TasksPage() {
               <h3>{task.title}</h3>
               <p>{task.description}</p>
               <p>Статус: {TASK_STATUS_LABELS[task.status] ?? task.status}</p>
-              <p>Тип: {task.type}</p>
               <p>Проект: {task.projectId?.name || '-'}</p>
               <p>Комментарии: {task.comments?.length || 0}</p>
               {task.comments?.length > 0 && (
@@ -147,10 +142,6 @@ export function TasksPage() {
         >
           <option value="">Проект</option>
           {projects.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
-        </select>
-        <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}>
-          <option value="TASK">TASK</option>
-          <option value="FEATURE">FEATURE</option>
         </select>
         <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
           {TASK_STATUS_OPTIONS.map((statusOption) => (
