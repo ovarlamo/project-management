@@ -1,8 +1,9 @@
 import * as projectService from '../services/projectService.js';
+import { DEFAULT_PROJECT_STATUS } from '../constants/projectStatus.js';
 
 export async function listProjects(req, res, next) {
   try {
-    const status = req.query.status ?? 'ACTIVE';
+    const status = req.query.status ?? DEFAULT_PROJECT_STATUS;
     const projects = await projectService.listProjects(status);
     res.json({ success: true, data: projects });
   } catch (err) {

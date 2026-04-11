@@ -1,8 +1,9 @@
 import { Project } from '../models/Project.js';
 import { Task } from '../models/Task.js';
 import { ApiError } from '../utils/apiError.js';
+import { DEFAULT_PROJECT_STATUS } from '../constants/projectStatus.js';
 
-export async function listProjects(status = 'ACTIVE') {
+export async function listProjects(status = DEFAULT_PROJECT_STATUS) {
   const query = { isDeleted: false };
   if (status) query.status = status;
   return Project.find(query).sort({ updatedAt: -1 });
@@ -12,7 +13,7 @@ export async function createProject(payload) {
   return Project.create({
     name: payload.name,
     description: payload.description || '',
-    status: payload.status || 'ACTIVE'
+    status: payload.status || DEFAULT_PROJECT_STATUS
   });
 }
 

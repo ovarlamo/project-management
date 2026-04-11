@@ -2,14 +2,20 @@ import { useEffect, useState } from 'react';
 import { EditDialog } from '../components/EditDialog';
 import { Loader } from '../components/Loader';
 import { api } from '../services/api';
+import {
+  ALL_PROJECTS_STATUS_OPTION,
+  DEFAULT_PROJECT_STATUS,
+  PROJECT_STATUS_LABELS,
+  PROJECT_STATUS_OPTIONS
+} from '../constants/projectStatus';
 
 export function ProjectsPage() {
   const [projects, setProjects] = useState([]);
-  const [status, setStatus] = useState('ACTIVE');
+  const [status, setStatus] = useState(DEFAULT_PROJECT_STATUS);
   const [isLoading, setIsLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', status: 'ACTIVE' });
+  const [form, setForm] = useState({ name: '', description: '', status: DEFAULT_PROJECT_STATUS });
   const [editingProject, setEditingProject] = useState(null);
-  const [editForm, setEditForm] = useState({ name: '', description: '', status: 'ACTIVE' });
+  const [editForm, setEditForm] = useState({ name: '', description: '', status: DEFAULT_PROJECT_STATUS });
 
   const load = async () => {
     setIsLoading(true);
@@ -28,7 +34,7 @@ export function ProjectsPage() {
   const create = async (e) => {
     e.preventDefault();
     await api.post('/projects', form);
-    setForm({ name: '', description: '', status: 'ACTIVE' });
+    setForm({ name: '', description: '', status: DEFAULT_PROJECT_STATUS });
     load();
   };
 
@@ -43,7 +49,7 @@ export function ProjectsPage() {
 
   const closeEdit = () => {
     setEditingProject(null);
-    setEditForm({ name: '', description: '', status: 'ACTIVE' });
+    setEditForm({ name: '', description: '', status: DEFAULT_PROJECT_STATUS });
   };
 
   const saveEdit = async () => {
@@ -63,9 +69,10 @@ export function ProjectsPage() {
       <div className="toolbar">
         <label>Статус:</label>
         <select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="ARCHIVED">ARCHIVED</option>
-          <option value="">ALL</option>
+          {PROJECT_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+          <option value={ALL_PROJECTS_STATUS_OPTION.value}>{ALL_PROJECTS_STATUS_OPTION.label}</option>
         </select>
       </div>
       <form onSubmit={create} className="card form-grid">
@@ -81,8 +88,9 @@ export function ProjectsPage() {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
         <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="ARCHIVED">ARCHIVED</option>
+          {PROJECT_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </select>
         <button type="submit">Создать</button>
       </form>
@@ -94,7 +102,7 @@ export function ProjectsPage() {
             <article key={project._id} className="card">
               <h3>{project.name}</h3>
               <p>{project.description}</p>
-              <p>{project.status}</p>
+              <p>{PROJECT_STATUS_LABELS[project.status] ?? project.status}</p>
               <button type="button" onClick={() => startEdit(project)}>Редактировать</button>
               <button type="button" onClick={() => remove(project._id)}>Удалить</button>
             </article>
@@ -122,8 +130,9 @@ export function ProjectsPage() {
           value={editForm.status}
           onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
         >
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="ARCHIVED">ARCHIVED</option>
+          {PROJECT_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </select>
       </EditDialog>
     </section>

@@ -1,0 +1,6 @@
+export const PROJECT_STATUSES = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED'
+});
+
+export const DEFAULT_PROJECT_STATUS = PROJECT_STATUSES.ACTIVE;
