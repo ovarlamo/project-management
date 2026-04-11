@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react';
+import { Loader } from '../components/Loader';
 import { api } from '../services/api';
 
 export function UsersPage() {
   const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({ email: '', fullName: '', password: '', isAdmin: false });
 
-  const load = async () => setUsers(await api.get('/users'));
+  const load = async () => {
+    setIsLoading(true);
+    try {
+      setUsers(await api.get('/users'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => { load(); }, []);
 
   const create = async (e) => {
@@ -30,16 +40,20 @@ export function UsersPage() {
         <label><input type="checkbox" checked={form.isAdmin} onChange={(e) => setForm({ ...form, isAdmin: e.target.checked })} /> Админ</label>
         <button type="submit">Создать</button>
       </form>
-      <div className="list">
-        {users.map((user) => (
-          <article key={user._id} className="card">
-            <h3>{user.fullName}</h3>
-            <p>{user.email}</p>
-            <p>{user.isAdmin ? 'Administrator' : 'User'}</p>
-            <button onClick={() => remove(user._id)}>Удалить</button>
-          </article>
-        ))}
-      </div>
+      {isLoading ? (
+        <Loader label="Загружаем пользователей..." />
+      ) : (
+        <div className="list">
+          {users.map((user) => (
+            <article key={user._id} className="card">
+              <h3>{user.fullName}</h3>
+              <p>{user.email}</p>
+              <p>{user.isAdmin ? 'Administrator' : 'User'}</p>
+              <button onClick={() => remove(user._id)}>Удалить</button>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

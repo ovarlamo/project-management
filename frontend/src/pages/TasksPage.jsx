@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { EditDialog } from '../components/EditDialog';
+import { Loader } from '../components/Loader';
 import { api } from '../services/api';
 
 export function TasksPage() {
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({ projectId: '', status: '' });
   const [form, setForm] = useState({ title: '', description: '', projectId: '', type: 'TASK', status: 'NEW' });
   const [editingTask, setEditingTask] = useState(null);
@@ -12,8 +14,13 @@ export function TasksPage() {
 
   const loadProjects = async () => setProjects(await api.get('/projects?status='));
   const loadTasks = async () => {
-    const params = new URLSearchParams(filters);
-    setTasks(await api.get(`/tasks?${params.toString()}`));
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams(filters);
+      setTasks(await api.get(`/tasks?${params.toString()}`));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -85,28 +92,32 @@ export function TasksPage() {
         </select>
         <button type="submit">Создать</button>
       </form>
-      <div className="list">
-        {tasks.map((task) => (
-          <article key={task._id} className="card">
-            <h3>{task.title}</h3>
-            <p>{task.description}</p>
-            <p>{task.status} · {task.type}</p>
-            <p>Проект: {task.projectId?.name || '-'}</p>
-            <p>Комментарии: {task.comments?.length || 0}</p>
-            {task.comments?.length > 0 && (
-              <div>
-                {task.comments.map((item, index) => (
-                  <p key={`${task._id}-comment-${index}`}>
-                    • {item.text} ({new Date(item.createdAt).toLocaleString('ru-RU')})
-                  </p>
-                ))}
-              </div>
-            )}
-            <button type="button" onClick={() => startEdit(task)}>Редактировать</button>
-            <button type="button" onClick={() => comment(task._id)}>Добавить комментарий</button>
-          </article>
-        ))}
-      </div>
+      {isLoading ? (
+        <Loader label="Загружаем задачи..." />
+      ) : (
+        <div className="list">
+          {tasks.map((task) => (
+            <article key={task._id} className="card">
+              <h3>{task.title}</h3>
+              <p>{task.description}</p>
+              <p>{task.status} · {task.type}</p>
+              <p>Проект: {task.projectId?.name || '-'}</p>
+              <p>Комментарии: {task.comments?.length || 0}</p>
+              {task.comments?.length > 0 && (
+                <div>
+                  {task.comments.map((item, index) => (
+                    <p key={`${task._id}-comment-${index}`}>
+                      • {item.text} ({new Date(item.createdAt).toLocaleString('ru-RU')})
+                    </p>
+                  ))}
+                </div>
+              )}
+              <button type="button" onClick={() => startEdit(task)}>Редактировать</button>
+              <button type="button" onClick={() => comment(task._id)}>Добавить комментарий</button>
+            </article>
+          ))}
+        </div>
+      )}
       <EditDialog
         title="Редактирование задачи"
         open={Boolean(editingTask)}
