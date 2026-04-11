@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
 import { EditDialog } from '../components/EditDialog';
+import { Loader } from '../components/Loader';
 import { api } from '../services/api';
 
 export function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [status, setStatus] = useState('ACTIVE');
+  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({ name: '', description: '', status: 'ACTIVE' });
   const [editingProject, setEditingProject] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', description: '', status: 'ACTIVE' });
 
   const load = async () => {
-    const data = await api.get(`/projects?status=${status}`);
-    setProjects(data);
+    setIsLoading(true);
+    try {
+      const data = await api.get(`/projects?status=${status}`);
+      setProjects(data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -79,17 +86,21 @@ export function ProjectsPage() {
         </select>
         <button type="submit">Создать</button>
       </form>
-      <div className="list">
-        {projects.map((project) => (
-          <article key={project._id} className="card">
-            <h3>{project.name}</h3>
-            <p>{project.description}</p>
-            <p>{project.status}</p>
-            <button type="button" onClick={() => startEdit(project)}>Редактировать</button>
-            <button type="button" onClick={() => remove(project._id)}>Удалить</button>
-          </article>
-        ))}
-      </div>
+      {isLoading ? (
+        <Loader label="Загружаем проекты..." />
+      ) : (
+        <div className="list">
+          {projects.map((project) => (
+            <article key={project._id} className="card">
+              <h3>{project.name}</h3>
+              <p>{project.description}</p>
+              <p>{project.status}</p>
+              <button type="button" onClick={() => startEdit(project)}>Редактировать</button>
+              <button type="button" onClick={() => remove(project._id)}>Удалить</button>
+            </article>
+          ))}
+        </div>
+      )}
       <EditDialog
         title="Редактирование проекта"
         open={Boolean(editingProject)}
