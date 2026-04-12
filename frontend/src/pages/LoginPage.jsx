@@ -6,8 +6,8 @@ import { loginThunk } from "../features/auth/authSlice";
 export function LoginPage() {
   const dispatch = useDispatch();
   const { user, error, loading } = useSelector((state) => state.auth);
-  const [email, setEmail] = useState("admin@pms.local");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   if (user) return <Navigate to="/projects" replace />;
 
