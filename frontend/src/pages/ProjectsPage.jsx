@@ -10,6 +10,7 @@ import {
 } from '../constants/projectStatus';
 
 export function ProjectsPage() {
+  const deleteBlockedMessage = 'для удаления проекта необходимо удалить все связанные задачи';
   const [projects, setProjects] = useState([]);
   const [status, setStatus] = useState(DEFAULT_PROJECT_STATUS);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,8 +104,21 @@ export function ProjectsPage() {
               <h3>{project.name}</h3>
               <p>{project.description}</p>
               <p>{PROJECT_STATUS_LABELS[project.status] ?? project.status}</p>
-              <button type="button" onClick={() => startEdit(project)}>Редактировать</button>
-              <button type="button" onClick={() => remove(project._id)}>Удалить</button>
+              <div className="icon-actions">
+                <button type="button" className="icon-button" aria-label="Редактировать проект" title="Редактировать проект" onClick={() => startEdit(project)}>✏️</button>
+                <span title={project.relatedTasksCount > 0 ? deleteBlockedMessage : ''}>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label="Удалить проект"
+                    title={project.relatedTasksCount > 0 ? undefined : 'Удалить проект'}
+                    onClick={() => remove(project._id)}
+                    disabled={project.relatedTasksCount > 0}
+                  >
+                    🗑️
+                  </button>
+                </span>
+              </div>
             </article>
           ))}
         </div>

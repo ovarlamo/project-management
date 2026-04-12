@@ -16,6 +16,9 @@ input, textarea, select, button { padding: 10px; border: 1px solid #cfd8dc; bord
 button { background: #1565c0; color: white; border: none; cursor: pointer; }
 .error { color: #c62828; }
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; }
+.icon-actions { display: flex; gap: 8px; margin-top: 8px; }
+.icon-button { display: inline-flex; align-items: center; justify-content: center; width: 40px; min-width: 40px; height: 40px; padding: 0; font-size: 18px; line-height: 1; }
+.icon-button:disabled { opacity: .45; cursor: not-allowed; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
 .modal-content { width: min(620px, 100%); max-height: 90vh; overflow-y: auto; }

@@ -7,7 +7,35 @@ import { TASK_STATUSES } from '../constants/taskStatus.js';
 export async function listProjects(status = DEFAULT_PROJECT_STATUS) {
   const query = { isDeleted: false };
   if (status) query.status = status;
-  return Project.find(query).sort({ updatedAt: -1 });
+
+  return Project.aggregate([
+    { $match: query },
+    {
+      $lookup: {
+        from: 'tasks',
+        let: { projectId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$projectId', '$$projectId'] },
+              isDeleted: false
+            }
+          },
+          { $count: 'count' }
+        ],
+        as: 'tasksSummary'
+      }
+    },
+    {
+      $addFields: {
+        relatedTasksCount: {
+          $ifNull: [{ $arrayElemAt: ['$tasksSummary.count', 0] }, 0]
+        }
+      }
+    },
+    { $project: { tasksSummary: 0 } },
+    { $sort: { updatedAt: -1 } }
+  ]);
 }
 
 export async function createProject(payload) {
