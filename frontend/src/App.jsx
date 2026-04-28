@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { meThunk } from './features/auth/authSlice';
 import { LoginPage } from './pages/LoginPage';
@@ -7,6 +7,7 @@ import { ProjectsPage } from './pages/ProjectsPage';
 import { TasksPage } from './pages/TasksPage';
 import { UsersPage } from './pages/UsersPage';
 import { SearchPage } from './pages/SearchPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -33,7 +34,7 @@ export default function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/users" element={<ProtectedRoute adminOnly><UsersPage /></ProtectedRoute>} />
         </Route>
-        <Route path="*" element={<Navigate to="/projects" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
